@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from 'react';
+import Link from 'next/link';
 import {
   ReactFlow,
   useNodesState,
@@ -131,11 +132,19 @@ export default function Home() {
 
   return (
     <main className="w-full h-screen bg-neutral-950 flex flex-col">
-      <div className="absolute top-0 w-full p-8 z-10 pointer-events-none">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-          Compiler Design Phases
-        </h1>
-        <p className="text-neutral-400 mt-2 font-medium">Interactive Module Visualization</p>
+      <div className="absolute top-0 w-full p-8 z-10 flex justify-between items-start pointer-events-none">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 pointer-events-auto">
+            Compiler Design Phases
+          </h1>
+          <p className="text-neutral-400 mt-2 font-medium pointer-events-auto">Interactive Module Visualization</p>
+        </div>
+        <Link
+          href="/parse-tree"
+          className="pointer-events-auto px-6 py-3 bg-neutral-900/80 hover:bg-neutral-800 text-white rounded-xl border border-neutral-700 shadow-xl backdrop-blur-md transition-all font-semibold hover:scale-105 active:scale-95 flex items-center gap-2"
+        >
+          Try Parse Tree Visualizer
+        </Link>
       </div>
 
       <div className="flex-1 w-full relative">

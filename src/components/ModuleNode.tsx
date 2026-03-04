@@ -26,12 +26,14 @@ export default function ModuleNode({ data }: { data: any }) {
   return (
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+      animate={{ scale: data.isActive ? 1.1 : 1, opacity: data.isDimmed ? 0.4 : 1 }}
       whileHover={{ scale: 1.05 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={clsx(
-        'relative px-6 py-4 shadow-2xl rounded-2xl bg-neutral-900/80 backdrop-blur-xl border-2 min-w-[300px]',
-        gradientClass
+        'relative px-6 py-4 shadow-2xl rounded-2xl bg-neutral-900/80 backdrop-blur-xl border-2 min-w-[300px] transition-all duration-300',
+        data.isActive ? 'ring-4 ring-white/50 z-50 ' + gradientClass :
+          data.isDimmed ? 'grayscale border-neutral-800 bg-neutral-900/40' :
+            gradientClass
       )}
     >
       <Handle
@@ -39,7 +41,7 @@ export default function ModuleNode({ data }: { data: any }) {
         position={Position.Top}
         className="w-3 h-3 bg-neutral-300 border-2 border-neutral-900 !rounded-full"
       />
-      
+
       <div className="flex items-start gap-4">
         <div className="p-3 rounded-xl bg-white/10 text-white backdrop-blur-sm shadow-inner shadow-white/10">
           <Icon className="w-6 h-6" />
