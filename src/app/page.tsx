@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import Link from 'next/link';
 import {
   ReactFlow,
@@ -124,6 +125,50 @@ const initialEdges: Edge[] = [
 export default function Home() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [currentModule, setCurrentModule] = useState<number>(0);
+
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        const stepNum = node.data.step as number;
+        // If currentModule is 0, nothing is dimmed and nothing is explicitly active
+        // If currentModule > 0, the matching step is active, the rest are dimmed
+        const isActive = currentModule > 0 && stepNum === currentModule;
+        const isDimmed = currentModule > 0 && stepNum !== currentModule;
+
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            isActive,
+            isDimmed
+          }
+        };
+      })
+    );
+
+    setEdges((eds) =>
+      eds.map((edge) => {
+        // Find which step numbers this edge connects
+        const sourceStep = parseInt(edge.source);
+        const targetStep = parseInt(edge.target);
+
+        // The edge is highlighted if currentModule is >= its target step
+        // or if we want it completely highlighted when currentModule === 0
+        const isEdgeActive = currentModule === 0 || currentModule >= targetStep;
+
+        return {
+          ...edge,
+          animated: isEdgeActive,
+          style: {
+            ...edge.style,
+            stroke: isEdgeActive ? edge.style?.color || edge.style?.stroke : '#334155', // Slate 700 if dimmed
+            strokeWidth: isEdgeActive ? 3 : 2
+          }
+        };
+      })
+    );
+  }, [currentModule, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
@@ -163,6 +208,41 @@ export default function Home() {
           <Background color="#333" gap={24} size={2} />
           <Controls className="!bg-neutral-900 !border-neutral-800 !fill-white" />
         </ReactFlow>
+
+        {/* Navigation Controls Overlay */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-neutral-900/90 backdrop-blur-xl p-4 rounded-2xl border border-neutral-700 shadow-2xl flex flex-col items-center gap-4 transition-all z-20">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setCurrentModule(0)}
+              className="p-3 hover:bg-neutral-800 rounded-xl text-neutral-400 hover:text-white transition-colors"
+              title="Reset View"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setCurrentModule(c => Math.max(1, c - 1))}
+              disabled={currentModule <= 1}
+              className="p-3 hover:bg-neutral-800 disabled:opacity-30 rounded-xl text-neutral-400 hover:text-white transition-colors"
+              title="Previous Module"
+            >
+              <SkipBack className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setCurrentModule(c => c === 0 ? 1 : Math.min(c + 1, 5))}
+              disabled={currentModule >= 5}
+              className="bg-gradient-to-r from-blue-600 to-purple-500 hover:from-blue-500 hover:to-purple-400 disabled:opacity-50 disabled:grayscale text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20"
+            >
+              {currentModule === 0 ? <><Play className="w-5 h-5" /> Start Modules</> : 'Next Module'}
+            </button>
+          </div>
+          {currentModule > 0 && (
+            <div className="text-sm font-mono text-purple-400 min-h-[24px] text-center w-full min-w-[300px] bg-black/40 py-2 px-4 rounded-lg border border-neutral-800">
+              Viewing Module {currentModule} of 5
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
